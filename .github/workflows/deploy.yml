@@ -1,0 +1,40 @@
+name: "Deploy Auth Server"
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DEPLOY_HOST: 178.104.136.42
+  DEPLOY_USER: gautham
+  AUTH_SERVER_PATH: /home/gautham/auth-server
+  RAGBOT_POC_PATH: /home/gautham/ragbot-poc
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Set up SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.HETZNER_SSH_PRIVATE_KEY }}" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H ${DEPLOY_HOST} >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Deploy Code (git pull)
+        run: |
+          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${AUTH_SERVER_PATH} && git pull origin main"
+
+      - name: Rebuild & Restart Container
+        run: |
+          # We run docker-compose from the main ragbot-poc folder, but target specifically the auth-server!
+          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${RAGBOT_POC_PATH} && docker compose -f docker-compose.prod.yaml up -d --build auth-server"

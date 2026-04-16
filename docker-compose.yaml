@@ -1,0 +1,36 @@
+services:
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: secure_password
+      POSTGRES_DB: ragbot_auth
+    ports:
+      - "15432:5432"
+    restart: always
+
+  auth-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - DATABASE_URL=postgresql://admin:secure_password@auth-db:5432/ragbot_auth?schema=public
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
+      - BETTER_AUTH_URL=http://localhost:4000
+    depends_on:
+      - auth-db
+    restart: always
+
+  ragbot-web:
+    build:
+      context: ../ragbot-poc/web
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_AUTH_URL=http://localhost:4000
+    depends_on:
+      - auth-server
+    restart: always
