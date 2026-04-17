@@ -30,9 +30,10 @@ jobs:
           ssh-keyscan -H ${DEPLOY_HOST} >> ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Deploy Code (git pull)
+      - name: Deploy Code (git clone or pull)
         run: |
-          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${AUTH_SERVER_PATH} && git pull origin main"
+          # If the directory doesn't exist yet, git clone it. Otherwise, pull the latest changes!
+          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "if [ ! -d ${AUTH_SERVER_PATH} ]; then git clone https://github.com/gautham-inv/auth-server.git ${AUTH_SERVER_PATH}; else cd ${AUTH_SERVER_PATH} && git pull origin main; fi"
 
       - name: Rebuild & Restart Container
         run: |
