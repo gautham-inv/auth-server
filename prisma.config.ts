@@ -10,7 +10,4 @@ export default defineConfig({
   migrations: {
     path: "prisma/migrations",
   },
-  datasource: {
-    ...(datasourceUrl ? { url: datasourceUrl } : {}),
-  },
 });

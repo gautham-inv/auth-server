@@ -33,9 +33,9 @@ jobs:
       - name: Deploy Code (git clone or pull)
         run: |
           # If the directory doesn't exist yet, git clone it. Otherwise, pull the latest changes!
-          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "if [ ! -d ${AUTH_SERVER_PATH} ]; then git clone https://github.com/gautham-inv/auth-server.git ${AUTH_SERVER_PATH}; else cd ${AUTH_SERVER_PATH} && git pull origin main; fi"
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=10 ${DEPLOY_USER}@${DEPLOY_HOST} "if [ ! -d ${AUTH_SERVER_PATH} ]; then git clone https://github.com/gautham-inv/auth-server.git ${AUTH_SERVER_PATH}; else cd ${AUTH_SERVER_PATH} && git pull origin main; fi"
 
       - name: Rebuild & Restart Container
         run: |
           # We run docker-compose from the main ragbot-poc folder, but target specifically the auth-server!
-          ssh ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${RAGBOT_POC_PATH} && docker compose -f docker-compose.prod.yaml up -d --build auth-server"
+          ssh -o ServerAliveInterval=60 -o ServerAliveCountMax=10 ${DEPLOY_USER}@${DEPLOY_HOST} "cd ${RAGBOT_POC_PATH} && docker compose -f docker-compose.prod.yaml up -d --build auth-server"
