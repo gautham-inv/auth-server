@@ -4,13 +4,14 @@ import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
 import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
+import { Pool } from "pg";                          // ← add this
 import { cors } from "hono/cors";
 import "dotenv/config";
 
-const adapter = new PrismaPg({
+const pool = new Pool({                             // ← create pool
   connectionString: process.env.DATABASE_URL,
 });
-
+const adapter = new PrismaPg(pool);                 // ← pass pool, not config object
 const prisma = new PrismaClient({ adapter });
 
 const corsOrigins = (process.env.CORS_ORIGINS ?? "http://localhost:3000,http://localhost:3001")
