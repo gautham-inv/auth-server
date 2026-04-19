@@ -5,10 +5,11 @@ WORKDIR /app
 # Install dependencies and build
 COPY package*.json ./
 COPY prisma ./prisma
+COPY prisma.config.ts ./
 RUN npm install
 
 COPY . .
-RUN npx prisma generate
+# npx prisma generate is handled by npm install (postinstall)
 
 # Final stage
 FROM node:20-alpine
